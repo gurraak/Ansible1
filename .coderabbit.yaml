@@ -1,0 +1,31 @@
+# CodeRabbit Configuration
+# Generated: 2025-06-06T14:11:48Z
+# Analysis Type: security
+# Repository: gurraak/Ansible1
+
+reviews:
+  auto_review:
+    enabled: true
+  instructions: |
+    Focus on security analysis including:
+1. Vulnerability scanning and identification
+2. Authentication and authorization patterns
+3. Input validation and sanitization
+4. Secure coding practice compliance
+5. GitHub security features utilization
+6. Ansible security best practices
+7. Secrets management and secure variable handling
+
+
+summary:
+  enabled: true
+  style: detailed
+
+settings:
+  enable_sequence_diagrams: true
+  review_level: comprehensive
+  
+github:
+  enable_actions_analysis: true
+  check_security_advisories: true
+  analyze_workflows: true
