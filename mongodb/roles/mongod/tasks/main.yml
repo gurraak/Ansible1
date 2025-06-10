@@ -1,6 +1,5 @@
 ---
 # This role deploys the mongod processes and sets up the replication set.
-
 - name: create data directory for mongodb
   file: path={{ mongodb_datadir_prefix }}/mongo-{{ inventory_hostname }} state=directory owner=mongod group=mongod
   delegate_to: '{{ item }}'
@@ -17,7 +16,6 @@
   delegate_to: '{{ item }}'
   with_items: groups.replication_servers
 
-
 - name: Create the mongodb configuration file
   template: src=mongod.conf.j2 dest=/etc/mongod-{{ inventory_hostname }}.conf
   delegate_to: '{{ item }}'
@@ -25,7 +23,6 @@
 
 - name: Copy the keyfile for authentication
   copy: src=secret dest={{ mongodb_datadir_prefix }}/secret owner=mongod group=mongod mode=0400
-
 
 - name: Start the mongodb service
   command: creates=/var/lock/subsys/mongod-{{ inventory_hostname }} /etc/init.d/mongod-{{ inventory_hostname }} start
@@ -40,3 +37,46 @@
 
 - name: Initialize the replication set
   shell: /usr/bin/mongo --port "{{ mongod_port }}" /tmp/repset_init.js
+
+- name: Verify MongoDB service is running and accessible
+  shell: /usr/bin/mongo --port "{{ mongod_port }}" --eval "db.runCommand('ping')"
+  register: mongodb_ping_result
+  failed_when: mongodb_ping_result.rc != 0
+  delegate_to: '{{ item }}'
+  with_items: groups.replication_servers
+  tags: 
+    - health_check
+    - verify
+
+- name: Clean up and secure MongoDB installation
+  block:
+    - name: Remove temporary replication set initialization file
+      file:
+        path: /tmp/repset_init.js
+        state: absent
+    
+    - name: Ensure MongoDB configuration files have correct permissions
+      file:
+        path: /etc/mongod-{{ inventory_hostname }}.conf
+        owner: mongod
+        group: mongod
+        mode: 0640
+      delegate_to: '{{ item }}'
+      with_items: groups.replication_servers
+    
+    - name: Create MongoDB status log file
+      file:
+        path: /var/log/mongo/mongodb-deployment-{{ ansible_date_time.date }}.log
+        state: touch
+        owner: mongod
+        group: mongod
+        mode: 0644
+    
+    - name: Log successful deployment
+      lineinfile:
+        path: /var/log/mongo/mongodb-deployment-{{ ansible_date_time.date }}.log
+        line: "{{ ansible_date_time.iso8601 }} - MongoDB replication set deployed successfully on {{ inventory_hostname }}"
+        create: yes
+  tags:
+    - cleanup
+    - security
