@@ -25,3 +25,44 @@
   command: getenforce
   register: sestatus
   changed_when: false
+
+- name: Create a test user
+  user:
+    name: testuser
+    comment: Test User
+    shell: /bin/bash
+  tags: user
+
+- name: Copy a test file
+  copy:
+    content: "This is a test file created by Ansible.\n"
+    dest: /tmp/testfile.txt
+    owner: testuser
+    group: testuser
+    mode: '0644'
+  tags: copy
+
+- name: Set permissions on /tmp directory
+  file:
+    path: /tmp
+    mode: '1777'
+  tags: permissions
+
+- name: Check disk usage
+  command: df -h
+  register: disk_usage
+  changed_when: false
+  tags: disk
+
+- name: Print disk usage
+  debug:
+    var: disk_usage.stdout_lines
+  tags: disk
+
+- name: Install htop if not already installed
+  yum:
+    name: htop
+    state: present
+  when: ansible_distribution == "CentOS"
+  tags: htop
+
