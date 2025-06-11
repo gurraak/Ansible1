@@ -1,0 +1,31 @@
+# CodeRabbit Configuration
+# Generated: 2025-06-11T13:05:53Z
+# Analysis Type: full
+# Repository: gurraak/Ansible1
+
+reviews:
+  auto_review:
+    enabled: true
+  instructions: |
+    Please analyze this GitHub repository comprehensively including:
+1. Overall architecture and design patterns
+2. File-by-file summaries and relationships
+3. Code execution flow and dependencies
+4. Security vulnerabilities and best practices
+5. Performance implications and optimizations
+6. GitHub Actions workflow analysis and recommendations
+7. Ansible-specific best practices and improvements
+
+
+summary:
+  enabled: true
+  style: detailed
+
+settings:
+  enable_sequence_diagrams: true
+  review_level: comprehensive
+  
+github:
+  enable_actions_analysis: true
+  check_security_advisories: true
+  analyze_workflows: true
